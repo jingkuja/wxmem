@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:jaxrs="http://cxf.apache.org/blueprint/jaxrs"
+	xmlns:cxf="http://cxf.apache.org/blueprint/core"
+	xmlns:camel="http://camel.apache.org/schema/blueprint"
+	xsi:schemaLocation="http://www.osgi.org/xmlns/blueprint/v1.0.0 http://www.osgi.org/xmlns/blueprint/v1.0.0/blueprint.xsd
+	http://cxf.apache.org/blueprint/jaxrs http://cxf.apache.org/schemas/blueprint/jaxrs.xsd
+	http://cxf.apache.org/blueprint/core http://cxf.apache.org/schemas/blueprint/core.xsd
+	http://camel.apache.org/schema/blueprint http://camel.apache.org/schema/blueprint/camel-blueprint.xsd">
+
+	<!-- Service providing -->
+	<jaxrs:server id="JAXRSWememauthResource" address="/wxmem">
+		<jaxrs:serviceBeans>
+			<ref component-id="authResource" />
+		</jaxrs:serviceBeans>
+	</jaxrs:server>
+
+	
+	<service ref="authServerRef"  interface="org.aves.wxmem.auth.api.IAuthServer"/>
+			
+	<!-- Service required -->
+	<reference id="dataSourceRef" interface="javax.sql.DataSource" filter="(osgi.jndi.service.name=jdbc/transfer)"/>	
+	<reference id="redisSourceRef" interface="org.aves.iora.redis.RedisSource"/>
+	
+
+	<!-- Bean Implementation -->
+	<bean id="authRepositoryRef" class="org.aves.wxmem.auth.imp.AuthRepository">
+		<property name="dataSource" ref="dataSourceRef"/>
+	</bean>
+	
+	
+	<bean id="authServerRef" class="org.aves.wxmem.auth.imp.AuthServer">
+		<property name="authRepository" ref="authRepositoryRef"/>
+		<property name="redisSource" ref="redisSourceRef" />		
+	</bean>
+		
+	<bean id="authResource" class="org.aves.wxmem.auth.portal.AuthResource">
+		<property name="authServer" ref="authServerRef" />			
+		<property name="emailaccont" value="avesupport@aliyun.com" />
+		<property name="emailaddress" value="avesupport@aliyun.com" />
+		<property name="emailpass" value="aves2seva" />
+		<property name="smtp" value="smtp.aliyun.com" />	
+		<property name="sakey" value="05FDE1F4C7E6EE7177773DE2F15E0907" />					
+	</bean>
+	
+	
+	
+</blueprint>
